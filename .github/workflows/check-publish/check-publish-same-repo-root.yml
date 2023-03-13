@@ -1,0 +1,16 @@
+name: Publish Same Repo Root
+
+on: [workflow_dispatch, pull_request]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "publish"
+        uses: asstart/obsidian-publish@main
+        with:
+          publishAll: true
+          targetBranch: gh-pages-root

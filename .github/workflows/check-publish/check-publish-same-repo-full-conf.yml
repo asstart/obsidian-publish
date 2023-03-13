@@ -1,0 +1,24 @@
+name: Publish Same Repo Full Conf
+
+on: [workflow_dispatch, pull_request]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "publish"
+        uses: asstart/obsidian-publish@main
+        with:
+          targetRepo: asstart/obsidian-publish-action-test
+          targetBranch: gh-pages-fullconf
+          sourceFolder: .
+          targetFolder: .
+          tags: example
+          publishAll: false
+          jekyllTheme: just-the-docs
+          jekyllTitle: Full Conf Example
+          jekyllDescription: It's description of my obsidian site
+          colorSchema: dark
