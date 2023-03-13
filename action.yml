@@ -1,0 +1,93 @@
+name: "Obsidian Publish Action"
+description: "Publish selected note from your obsidian"
+auther: "Artem Astashov"
+inputs:
+  # Repository where files will be published
+  # Format: <user>/<repository>, for example: asstart/obsidian-publish-jsaction
+  # Default: ${{ github.repository }}
+  targetRepo:
+    description: "Repository where to publish"
+    required: false
+    default: ${{ github.repository }}
+  # Branch in which files will be published
+  # Default: gh-pages
+  targetBranch:
+    description: "Branch to publish"
+    required: false
+    default: gh-pages
+  # Folder in which files will be searched
+  # Default: root of the ${{ github.repository }}
+  sourceFolder:
+    description: "Directory to search files in the source repository"
+    required: false
+    default: "."
+  # Folder in which files will be copied
+  # Can be either root of the targetRepo or docs in the targetRepo
+  # Default: root of the ${{ inputs.targetRepo }}
+  targetFolder:
+    description: "Directory to copy files in the target repository"
+    required: false
+    default: "."
+  # Tags list to filter files that must be published
+  # If no tags specified nothing will be published
+  # If specify publisheAll: true, this option will be ignored
+  # Format: tag1,tag2
+  tags:
+    description: "Tags to filter content"
+    required: false
+  # Publish all markdown files from the sourceFolder
+  # If this set true, tags will be ignored
+  # Default: false
+  publishAll:
+    description: "Publish all files to inputs.sourceFolder"
+    required: false
+    default: false
+  # Github secret name with token to access to targetRepository
+  # in case if targetRepository isn't ${{ github.repository }}
+  token:
+    description: "Access token to push to target repo"
+    required: false
+  jekyllTheme:
+    required: false
+  jekyllTitle:
+    required: false
+  jekyllDescription:
+    required: false
+  colorSchema:
+    required: false
+  domain:
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: "Check out obsidian repository"
+      uses: actions/checkout@v3
+      with:
+        path: source
+    - name: "Check out target repository"
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.targetRepo }}
+        path: target
+    - name: "Find out default branch of target repository"
+      run: |
+        TMP_BRANCH=$(git remote show origin | awk '/HEAD branch/ {print $NF}') && \
+        echo TARGET_DEFAULT_BRANCH=$TMP_BRANCH >> $GITHUB_ENV
+      shell: bash
+      working-directory: target
+    - name: "Run publishing action"
+      uses: "asstart/obsidian-publish-exec@main"
+      with:
+        targetRepo: ${{ inputs.targetRepo }}
+        token: ${{ inputs.token }}
+        targetBranch: ${{ inputs.targetBranch }}
+        sourceFolder: ${{ inputs.sourceFolder }}
+        targetFolder: ${{ inputs.targetFolder }}
+        publishAll: ${{ inputs.publishAll }}
+        tags: ${{ inputs.tags }}
+        jekyllTheme: ${{ inputs.jekyllTheme }}
+        jekyllTitle: ${{ inputs.jekyllTitle }}
+        jekyllDescription: ${{ inputs.jekyllDescription }}
+        colorSchema: ${{ inputs.colorSchema }}
+        domain: ${{ inputs.domain }}
+        targetDefaultBranch: ${{ env.TARGET_DEFAULT_BRANCH }}
